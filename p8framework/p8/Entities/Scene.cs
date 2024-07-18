@@ -7,66 +7,30 @@ using System.Linq;
 
 namespace yukon.p8framework
 {
-    public class Scene : IDisposable
+    public class Scene : Entity
     {
-        #region properties
-        public string Name = "Untitled Scene";
-        public bool Enabled = true;
-        public bool Visible = true;
-        public int Depth = 0;
-
-        public bool Disposed = false;
-        #endregion
-
-        #region references
-        // entities
-        public List<Entity> Entities // all entites (including drawables)
+        public List<IDrawableEntity> DrawableEntities = new();
+        
+        public Scene(string _name) : base(_name, null)
         {
-            get { return entities; }
-        }
-        private List<Entity> entities = new();
-
-        public List<DrawableEntity> DrawableEntities // just drawable entities
-        {
-            get { return drawableEntities; }
-        }
-        private List<DrawableEntity> drawableEntities = new();
-
-        // monogame content
-        public ContentManager Content
-        {
-            get { return content; }
-        }
-        private ContentManager content;
-        #endregion
-
-        #region constructor
-        public Scene(string _name)
-        {
-            Name = _name;
+            Scene = this;
 
             p8.Scenes.Add(this);
-
-            content = new ContentManager(p8.Game.Services, "Content");
-        }
-        #endregion
-
-        #region dispose
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
-        protected void Dispose(bool _disposing)
+        public override void OnAwake()
         {
-            if (!Disposed)
+            
+        }
+
+        public override void OnDispose()
+        {
+            DrawableEntities.Clear();
+
+            if (p8.Scenes.Contains(this))
             {
-                Disposed = true;
-
-                content = null;
-
                 p8.Scenes.Remove(this);
+
                 if (p8.CurrentScene == this)
                 {
                     if (p8.Scenes.Count > 0)
@@ -78,72 +42,42 @@ namespace yukon.p8framework
                         p8.CurrentScene = null;
                     }
                 }
-
-                for (int i = 0; i < entities.Count; i++)
-                {
-                    Console.WriteLine("Disposing " + entities[i].Name);
-                    entities[i].Scene = null;
-                    entities[i].Dispose();
-                }
-
-                entities.Clear();
-                drawableEntities.Clear();
             }
         }
-        #endregion
 
-        #region game functions
-        public void Update(GameTime _gameTime)
+        public override void OnUpdate(GameTime _gameTime)
         {
-            if(Enabled)
-            {
-                for(int i = 0; i < entities.Count; i++)
-                {
-                    if (!entities[i].Disposed && entities[i].Enabled)
-                    {
-                        entities[i].Update(_gameTime);
-                    }
-                }
-            }
+            
         }
 
         public void Draw(GameTime _gameTime, SpriteBatch _spriteBatch)
         {
-            if(Visible)
-            {
-                drawableEntities.OrderBy(e => e.Depth);
+            DrawableEntities.OrderBy(e => e.Depth);
 
-                for (int i = 0; i < drawableEntities.Count; i++)
+            for (int i = 0; i < DrawableEntities.Count; i++)
+            {
+                Entity entity = DrawableEntities[i] as Entity;
+                if(entity != null && !entity.Disposed)
                 {
-                    if (!drawableEntities[i].Disposed && drawableEntities[i].Visible)
-                    {
-                        drawableEntities[i].Draw(_gameTime, _spriteBatch);
-                    }
+                    DrawableEntities[i].OnDraw(_gameTime, _spriteBatch);
                 }
             }
         }
-        #endregion
 
-        #region management functions
-        public void AddEntity(Entity _entity)
+        public void AddDrawableEntity(IDrawableEntity _drawableEntity)
         {
-            entities.Add(_entity);
-            
-            if(_entity is DrawableEntity)
+            if(!DrawableEntities.Contains(_drawableEntity))
             {
-                drawableEntities.Add(_entity as DrawableEntity);
+                DrawableEntities.Add(_drawableEntity);
             }
         }
 
-        public void RemoveEntity(Entity _entity)
+        public void RemoveDrawableEntity(IDrawableEntity _drawableEntity)
         {
-            entities.Remove(_entity);
-
-            if (_entity is DrawableEntity)
+            if (DrawableEntities.Contains(_drawableEntity))
             {
-                drawableEntities.Remove(_entity as DrawableEntity);
+                DrawableEntities.Remove(_drawableEntity);
             }
         }
-        #endregion
     }
 }

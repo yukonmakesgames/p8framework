@@ -1,3 +1,3 @@
 ﻿
-using var game = new p8framework.Game1();
+using var game = new videogame.Game1();
 game.Run();

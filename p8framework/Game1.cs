@@ -12,9 +12,12 @@ namespace videogame
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
-        private Entity testEntity = null;
-        WeakReference wr = null;
         WeakReference wrScene = null;
+        WeakReference wrEntity = null;
+        WeakReference wrChildEntity = null;
+
+        private Entity testEntity = null;
+        private Entity testChildEntity = null;
 
         public Game1()
         {
@@ -38,10 +41,14 @@ namespace videogame
 
             // TODO: use this.Content to load your game content here
             p8.CurrentScene = new Scene("testing");
+            wrScene = new WeakReference(p8.CurrentScene);
 
             testEntity = new TestEntity("test", p8.CurrentScene);
-            wr = new WeakReference(testEntity);
-            wrScene = new WeakReference(p8.CurrentScene);
+            wrEntity = new WeakReference(testEntity);
+
+            testChildEntity = new TestEntity("test child", testEntity);
+            wrChildEntity = new WeakReference(testChildEntity);
+
         }
 
         protected override void Update(GameTime _gameTime)
@@ -52,13 +59,17 @@ namespace videogame
             // TODO: Add your update logic here
             p8.Update(_gameTime);
 
+            
+
             if (Keyboard.GetState().IsKeyDown(Keys.J))
             {
-                if (testEntity != null)
+                if (p8.CurrentScene != null)
                 {
-                    Debug.WriteLine("nooo!!! you killed me!!! :'''''c");
-                    testEntity.Dispose();
+                    Debug.WriteLine("killing scene");
                     testEntity = null;
+                    testChildEntity = null;
+
+                    p8.CurrentScene.Dispose();
 
                     GC.Collect();
                 }
@@ -66,17 +77,33 @@ namespace videogame
 
             if (Keyboard.GetState().IsKeyDown(Keys.K))
             {
-                if (p8.CurrentScene != null)
+                if (testEntity != null)
                 {
-                    Debug.WriteLine("woah wait you killed the entire scene!");
+                    Debug.WriteLine("killing entity");
+                    testChildEntity = null;
+
+                    testEntity.Dispose();
                     testEntity = null;
-                    p8.CurrentScene.Dispose();
 
                     GC.Collect();
                 }
             }
 
-            Debug.WriteLine("object: " + wr.IsAlive.ToString() + ", scene: " + wrScene.IsAlive.ToString());
+            if (Keyboard.GetState().IsKeyDown(Keys.L))
+            {
+                if (testChildEntity != null)
+                {
+                    Debug.WriteLine("killing child entity");
+
+
+                    testChildEntity.Dispose();
+                    testChildEntity = null;
+
+                    GC.Collect();
+                }
+            }
+
+            Debug.WriteLine("scene: " + wrScene.IsAlive.ToString() + ", entity: " + wrEntity.IsAlive.ToString() + ", child entity: " + wrChildEntity.IsAlive.ToString());
 
             base.Update(_gameTime);
         }
