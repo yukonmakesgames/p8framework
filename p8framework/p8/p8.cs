@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace yukon.p8framework
+namespace yukon.p8f
 {
     static class p8
     {

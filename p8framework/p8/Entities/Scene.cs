@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Linq;
 
-namespace yukon.p8framework
+namespace yukon.p8f
 {
     public class Scene : Entity
     {

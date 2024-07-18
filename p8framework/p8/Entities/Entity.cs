@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
-namespace yukon.p8framework
+namespace yukon.p8f
 {
     public abstract class Entity : IDisposable
     {
